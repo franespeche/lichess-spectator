@@ -27,7 +27,9 @@ const run = async (user: string) => {
 	 */
 
 	// create log stream
-	const stream = fs.createWriteStream("spectated-games.txt", { flags: "a" })
+	const stream = fs.createWriteStream(`spectated-games/${user}.txt`, {
+		flags: "a",
+	})
 
 	// track retries and lastGameId
 	let lastGameId: undefined | string
@@ -42,13 +44,14 @@ const run = async (user: string) => {
 		if (gameId && gameId !== lastGameId) {
 			// update lastGameId
 			lastGameId = gameId
+			retries = 0
 
-			console.log(now(), chalk.yellow(`${user} is playing!`))
+			console.log(now(), chalk.yellow(`${chalk.blue(user)} is playing!`))
 			console.log(now(), "attempting to spectate")
 
 			await spectateGame(page, gameId)
 
-			stream.write(`${now()} gameId: ${gameId}`)
+			stream.write(`${now()} gameId: ${gameId} \n`)
 		} else if (!gameId) {
 			// only log at runtime and once every 30 minutes
 			retries++
@@ -56,7 +59,7 @@ const run = async (user: string) => {
 				console.log(now(), `still no news :(`)
 			}
 		}
-	}, 1000)
+	}, 6000)
 }
 
 const user = process.argv.slice(2).shift()
