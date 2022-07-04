@@ -3,8 +3,6 @@ import "dotenv/config"
 import chalk from "chalk"
 import { getActiveGame, now, spectateGame, login } from "./helpers/index.js"
 
-// environment
-
 const run = async (user: string) => {
 	const browser = await launch({ headless: true })
 	const page = await browser.newPage()
@@ -12,7 +10,6 @@ const run = async (user: string) => {
 	/**
 	 * Log in to Lichess
 	 */
-
 	const lichessLogin = await login(page)
 	if (lichessLogin.error) {
 		// fail
