@@ -2,6 +2,9 @@ import { launch } from "puppeteer"
 import "dotenv/config"
 import chalk from "chalk"
 import { getActiveGame, now, spectateGame, login } from "./helpers/index.js"
+import fs from "fs"
+
+const log = (message: string) => {}
 
 const run = async (user: string) => {
 	const browser = await launch({ headless: true })
@@ -22,28 +25,38 @@ const run = async (user: string) => {
 	/**
 	 * Watch & spectate
 	 */
-	let lastGameId: undefined | string
-	let count = 0
 
-	console.log(now(), "watching..")
+	// create log stream
+	const stream = fs.createWriteStream("spectated-games.txt", { flags: "a" })
+
+	// track retries and lastGameId
+	let lastGameId: undefined | string
+	let retries = 0
+
+	// start watching
+	console.log(now(), `waiting for ${chalk.blue(user)} to start a game..`)
 	await setInterval(async () => {
 		// get gameId
 		let gameId = await getActiveGame(user)
 
 		if (gameId && gameId !== lastGameId) {
+			// update lastGameId
 			lastGameId = gameId
+
 			console.log(now(), chalk.yellow(`${user} is playing!`))
 			console.log(now(), "attempting to spectate")
 
 			await spectateGame(page, gameId)
+
+			stream.write(`${now()} gameId: ${gameId}`)
 		} else if (!gameId) {
-			// only log at runtime and every 10 minutes
-			count++
-			if (count === 1 || !(count % 20)) {
-				console.log(now(), `${user} is not playing any game yet`)
+			// only log at runtime and once every 30 minutes
+			retries++
+			if (retries === 1 || !(retries % 60)) {
+				console.log(now(), `still no news :(`)
 			}
 		}
-	}, 30000)
+	}, 1000)
 }
 
 const user = process.argv.slice(2).shift()
