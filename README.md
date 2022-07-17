@@ -1,4 +1,4 @@
-# lichess-spectator
+# lichess-stalker
 a simple lichess spectator bot
 
 # usage
