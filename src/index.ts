@@ -42,7 +42,6 @@ const run = (async () => {
 
   // Track retries and lastGameId
   let lastGameId: undefined | string
-  let retries = 0
 
   // Start watching
   console.log(now(), `waiting for ${chalk.blue(victim)} to start a game..`)
@@ -50,23 +49,18 @@ const run = (async () => {
     // Get gameId
     let gameId = await getActiveGame(victim)
 
+    // If there is an active game and it differs from the last spectated one, spectate
     if (gameId && gameId !== lastGameId) {
       // Update lastGameId
       lastGameId = gameId
-      retries = 0
 
       console.log(now(), chalk.yellow(`${chalk.blue(victim)} is playing!`))
       console.log(now(), "attempting to spectate")
 
+      // Spectate game
       await spectateGame(page, gameId)
 
       stream.write(`${now()} gameId: ${gameId} \n`)
-    } else if (!gameId) {
-      // Only log at runtime and once every 30 minutes
-      retries++
-      if (retries === 1 || !(retries % 60)) {
-        console.log(now(), `still no news :(`)
-      }
     }
   }, 15000)
 })()
