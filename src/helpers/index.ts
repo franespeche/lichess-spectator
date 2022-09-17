@@ -2,6 +2,7 @@ import axios from "axios"
 import chalk from "chalk"
 import {DateTime} from "luxon"
 import {Page} from "puppeteer"
+import {LOGIN_STATUS} from "src/types/common"
 import {TUserStatus} from "../types/user"
 
 // environment
@@ -31,18 +32,12 @@ export const login = async (
   user: string,
   password: string,
   page: Page
-): Promise<{status: string; error?: any}> => {
+): Promise<{success: boolean}> => {
   if (!user) {
-    return {
-      status: "fail",
-      error: 'No user provided',
-    }
+    throw new Error(`Missing parameter: user`)
   }
   if (!password) {
-    return {
-      status: "fail",
-      error: 'No password provided',
-    }
+    throw new Error(`Missing parameter: passowrd`)
   }
 
   console.log(now(), `logging in as: ${chalk.cyan(user)}`)
@@ -55,24 +50,26 @@ export const login = async (
     await page.click("button.submit")
 
     await page.waitForNavigation()
-    return {status: "success"}
-  } catch (e) {
-    // fail
-    return {status: "failed", error: e}
+
+    return {success: true}
+  } catch (err: any) {
+    throw new Error(`Failed with error: ${err}`)
   }
 }
 
 export const spectateGame = async (page: Page, gameId: string) => {
   try {
-    await page.goto(`https://lichess.org/${gameId}`, {
+    const endpoint = `${BASE_URL}/${gameId}`
+
+    await page.goto(endpoint, {
       waitUntil: "networkidle2",
     })
 
     console.log(now(), chalk.yellow(`spectating game ${gameId} :)`))
-  } catch (e) {
+  } catch (err) {
     console.error(
       now(),
-      chalk.red("ERROR:") + `couldnt spectate game ${gameId}`
+      chalk.red("ERROR:") + `Error spectating game:"${gameId}", err`
     )
   }
   return

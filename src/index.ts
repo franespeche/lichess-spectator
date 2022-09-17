@@ -5,8 +5,6 @@ import chalk from "chalk"
 import {getActiveGame, now, spectateGame, login} from "./helpers/index.js"
 import fs from "fs"
 
-const log = (message: string) => {}
-
 const run = (async () => {
   const {user, password, victim} = minimist(process.argv.slice(2))
 
@@ -26,39 +24,34 @@ const run = (async () => {
   const page = await browser.newPage()
 
 
-  /**
-   * Log in to Lichess
-   */
-  const lichessLogin = await login(user, password, page)
-  if (lichessLogin.error) {
-    // fail
-    console.error(now(), `${chalk.red(`ERROR:`)} ${lichessLogin.error}`)
-    return
+  // Log in to Lichess
+  const {success} = await login(user, password, page)
+  if (!success) {
+    throw new Error(`Error while trying to login`)
   }
+
   console.log(now(), chalk.green("success!"))
   console.log()
 
-  /**
-   * Watch & spectate
-   */
+  // Watch & spectate
 
   // create log stream
   const stream = fs.createWriteStream(`spectated-games/${victim}.txt`, {
     flags: "a",
   })
 
-  // track retries and lastGameId
+  // Track retries and lastGameId
   let lastGameId: undefined | string
   let retries = 0
 
-  // start watching
+  // Start watching
   console.log(now(), `waiting for ${chalk.blue(victim)} to start a game..`)
-  await setInterval(async () => {
-    // get gameId
+  setInterval(async () => {
+    // Get gameId
     let gameId = await getActiveGame(victim)
 
     if (gameId && gameId !== lastGameId) {
-      // update lastGameId
+      // Update lastGameId
       lastGameId = gameId
       retries = 0
 
@@ -69,7 +62,7 @@ const run = (async () => {
 
       stream.write(`${now()} gameId: ${gameId} \n`)
     } else if (!gameId) {
-      // only log at runtime and once every 30 minutes
+      // Only log at runtime and once every 30 minutes
       retries++
       if (retries === 1 || !(retries % 60)) {
         console.log(now(), `still no news :(`)
