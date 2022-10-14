@@ -1,11 +1,11 @@
-import axios from "axios"
-import chalk from "chalk"
-import {DateTime} from "luxon"
-import {Page} from "puppeteer"
-import {TUserStatus} from "../types/user"
+import axios from 'axios'
+import chalk from 'chalk'
+import { DateTime } from 'luxon'
+import { Page } from 'puppeteer'
+import { TUserStatus } from '../types/user'
 
 // environment
-const BASE_URL = "https://lichess.org"
+const BASE_URL = 'https://lichess.org'
 const USER_STATUS_ENDPOINT = `${BASE_URL}/api/users/status`
 
 /**
@@ -17,6 +17,13 @@ export const now = (): string => {
   return `[${now.hour}:${now.minute}:${now.second}]`
 }
 
+/**
+ * Simple logger
+ * @Param message - the message to log
+ */
+export const log = (message: string) => {
+  log(message)
+}
 /**
  * Gets the given user's status
  * @Param user {string} - The username to get its status
@@ -33,9 +40,7 @@ const getUserStatus = async (user: string): Promise<TUserStatus> => {
  * @Param user {string} - The username to get its active game
  * @Returns {Promise<gameId: string>} - A promise with the gameId
  */
-export const getActiveGame = async (
-  user: string
-): Promise<string | undefined> => {
+export const getActiveGame = async (user: string): Promise<string | undefined> => {
   const userStatus = await getUserStatus(user)
   return userStatus?.playingId
 }
@@ -46,32 +51,20 @@ export const getActiveGame = async (
  * @Param password {string} - The password
  * @Returns {Promise<success: boolean>} - A promise with success
  */
-export const login = async (
-  user: string,
-  password: string,
-  page: Page
-): Promise<{success: boolean}> => {
-  if (!user) {
-    throw new Error(`Missing parameter: user`)
-  }
-  if (!password) {
-    throw new Error(`Missing parameter: passowrd`)
-  }
-
-  console.log(now(), `logging in as: ${chalk.cyan(user)}`)
+export const login = async (user: string, password: string, page: Page): Promise<void> => {
+  if (!user) throw new Error(`Missing parameter: user`)
+  if (!password) throw new Error(`Missing parameter: passowrd`)
 
   try {
+    log(`logging in as: ${chalk.cyan(user)}`)
     // fill in form
-    await page.goto("https://lichess.org/login?referrer=/")
-    await page.type("#form3-username", user)
-    await page.type("#form3-password", password)
-    await page.click("button.submit")
-
+    await page.goto('https://lichess.org/login?referrer=/')
+    await page.type('#form3-username', user)
+    await page.type('#form3-password', password)
+    await page.click('button.submit')
     await page.waitForNavigation()
-
-    return {success: true}
   } catch (err: any) {
-    throw new Error(`Failed with error: ${err}`)
+    throw new Error(`Failed to log in with error: ${err}`)
   }
 }
 
@@ -84,17 +77,12 @@ export const login = async (
 export const spectateGame = async (page: Page, gameId: string) => {
   try {
     const endpoint = `${BASE_URL}/${gameId}`
-
     await page.goto(endpoint, {
-      waitUntil: "networkidle2",
+      waitUntil: 'networkidle2',
     })
-
-    console.log(now(), chalk.yellow(`spectating game ${gameId} :)`))
+    log(chalk.yellow(`spectating game ${gameId} :)`))
   } catch (err) {
-    console.error(
-      now(),
-      chalk.red("ERROR:") + `Error spectating game:"${gameId}", err`
-    )
+    console.error(now(), chalk.red('ERROR:') + `Error spectating game:"${gameId}" - ${err}`)
   }
   return
 }

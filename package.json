@@ -14,6 +14,7 @@
     "@types/node": "^18.0.0",
     "chalk": "^5.0.1",
     "dotenv": "^16.0.1",
+    "prettier": "^2.7.1",
     "typescript": "^4.7.4"
   },
   "type": "module",
