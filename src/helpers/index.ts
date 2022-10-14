@@ -56,13 +56,14 @@ export const login = async (user: string, password: string, page: Page): Promise
   if (!password) throw new Error(`Missing parameter: passowrd`)
 
   try {
-    log(`logging in as: ${chalk.cyan(user)}`)
+    log(`logging in as: ${chalk.cyan(user)}...`)
     // fill in form
     await page.goto('https://lichess.org/login?referrer=/')
     await page.type('#form3-username', user)
     await page.type('#form3-password', password)
     await page.click('button.submit')
     await page.waitForNavigation()
+    log(`success!`)
   } catch (err: any) {
     throw new Error(`Failed to log in with error: ${err}`)
   }

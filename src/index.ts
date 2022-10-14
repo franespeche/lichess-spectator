@@ -6,16 +6,15 @@ import { getActiveGame, now, spectateGame, login, log } from './helpers/index.js
 import fs from 'fs'
 
 const run = (async () => {
-  const { user, password, victim } = minimist(process.argv.slice(2))
+  const { user, password, victim, headless = true } = minimist(process.argv.slice(2))
 
   if (!victim) throw new Error('No victim provided')
   if (!user) throw new Error('No user provided')
   if (!password) throw new Error('No password provided')
 
-  const browser = await launch({ headless: true })
+  const browser = await launch({ headless })
   const page = await browser.newPage()
 
-  log('logging in to lichess..')
   await login(user, password, page)
 
   // create log stream
