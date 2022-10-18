@@ -22,7 +22,7 @@ export const now = (): string => {
  * @Param message - the message to log
  */
 export const log = (message: string) => {
-  console.log(message)
+  console.log(now(), message)
 }
 /**
  * Gets the given user's status
