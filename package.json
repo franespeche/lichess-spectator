@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "lichess user bot spectator",
   "main": "index.js",
-  "author": "mountanite",
+  "author": "frean",
   "license": "MIT",
   "scripts": {
     "spectate": "npx ts-node src/index.ts"
